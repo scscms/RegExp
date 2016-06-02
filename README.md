@@ -4,6 +4,7 @@
 来源于Perl的正则表达式是一门简单语言的语法规范，主要应用于字符串的信息实现查找、替换和提取的`技巧`操作。
 [正则表达式30分钟入门教程](http://deerchao.net/tutorials/regex/regex.htm)
 几个题目：
+
 1.要求用户名必须包含数字、大写字母、小写字母、长度8位以上，且不能以数字开头？
 2.禁止密码出现三个连续相同字母？
 3.怎么剔除字符串中的html标签？
@@ -40,21 +41,24 @@ var regex = new Function("return /xzy/i")();//不建议
 更多参见基本多语言面（Basic Multilingual Plane,BMP）详细信息[基本多文种平面](http://baike.baidu.com/view/628163.htm)
 
 ### 4、元字符
-  元字符是一种特殊的字符，是用来修饰原子用的，不可以单独出现；
-    `量词类`
-    ?   : {0,1} 表示其前面的原子可以出现0次或1次，有只能有一次，要么没有；
-    +   : {1,} 表示其前的原子可以出现1次 或多次，不能没有最少要有一个；
-    *   : {0,} 表示其前的原子可以出现0次、1次、或多次；
-    {m} : {5}表示前面的原子出现5次；
-    {m,}: {5,}表示前面的原子最少出现m次,最多无限；
-    {m,n}: m要小于n,表示前面出现的原子，最少m次，最多n次，包括m和n次；
-    `边界类`
-    ^  : 直接在一个正则表达式的第一个字符出现，则表达必须以这个正则表达式开始；
-    $  : 直接在一个正则表达式的最后一个字符出现，则表达必须以这个正则表达式结束；
-    \b : 表示一个边界；
-    \B : 表示一个非边界；
-    |  : 表示或的关系 , 它的优先级号是最低的，最后考虑它的功能；
-    () : 重点，作用如下：
+元字符是一种特殊的字符，是用来修饰原子用的，不可以单独出现；
+`量词类`
+?   : {0,1} 表示其前面的原子可以出现0次或1次，有只能有一次，要么没有；
++   : {1,} 表示其前的原子可以出现1次 或多次，不能没有最少要有一个；
++   
+*   : {0,} 表示其前的原子可以出现0次、1次、或多次；
+*   
+{m} : {5}表示前面的原子出现5次；
+
+{m,}: {5,}表示前面的原子最少出现m次,最多无限；
+{m,n}: m要小于n,表示前面出现的原子，最少m次，最多n次，包括m和n次；
+`边界类`
+^  : 直接在一个正则表达式的第一个字符出现，则表达必须以这个正则表达式开始；
+$  : 直接在一个正则表达式的最后一个字符出现，则表达必须以这个正则表达式结束；
+\b : 表示一个边界；
+\B : 表示一个非边界；
+|  : 表示或的关系 , 它的优先级号是最低的，最后考虑它的功能；
+() : 重点，作用如下：
 >A、作为大原子使用；
 B、改变优先级,加上括号可以提高优先级别；
 C、作为子模式使用；
@@ -198,44 +202,45 @@ var reg = /(?=^[A-Za-z0-9]{8,}$)(?=[^\d]+\d)(?=.*[a-z])(?=.*[A-Z])\w*/;
 后行断言的特点是从右向左匹配，分组编号虽然一样从左到右分配，但引用时必须在编号的左边引用。
 ### 应用
 ```JavaScript
-    //去除字符串两端的空格
-    String.prototype.trim = String.prototype.trim || function (){ return this.replace(/^\s*|\s*$/g,"")};
-    
-    //格式化HTML
-    String(text).replace(/&/g,'&amp;').replace(/\</g,'&lt;').replace(/\>/g,'&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    
-    //格式化时间
-    function formatDate(str,time){
-        time = time && time.toUTCString() != "Invalid Date" ? time : new Date();
-        var obj = {
-            YYYY :  time.getFullYear(),
-            YY   :  (""+ time.getFullYear()).slice(-2),
-            M    :  time.getMonth()+1,
-            MM   :  ("0"+ (time.getMonth()+1)).slice(-2),
-            D    :  time.getDate(),
-            DD   :  ("0" + time.getDate()).slice(-2),
-            H    :  time.getHours(),
-            HH   :  ("0" + time.getHours()).slice(-2),
-            m    :  time.getMinutes(),
-            mm   :  ("0" + time.getMinutes()).slice(-2),
-            s    :  time.getSeconds(),
-            ss   :  ("0" + time.getSeconds()).slice(-2),
-            w    :  ['日', '一', '二', '三', '四', '五', '六'][time.getDay()]
-        };
-        return str.replace(/([a-z]+)/ig,function(a){return obj[a]||""});
-    }
-    console.log(formatDate("YYYY-MM-DD HH:mm:ss 星期w"));
-    
-    //获取url参数
-    function getUrlParam(key,url){
-        url = url ? url.split("#")[0] : location.search;
-        var arr = [];
-        url.replace(new RegExp("[&?]"+ key + "=([^&#]*)","ig"), function(a,b) {
-            arr.push(decodeURIComponent(b));
-        });
-        return arr.length > 1 ? arr : arr.join("");
-    }
-    console.log(getUrlParam("a","http://www.baidu.com/?a=我们&a=2#a=3&a=4"));
+//去除字符串两端的空格
+String.prototype.trim = String.prototype.trim || function (){ return this.replace(/^\s*|\s*$/g,"")};
+
+//格式化HTML
+String(text).replace(/&/g,'&amp;').replace(/\</g,'&lt;').replace(/\>/g,'&gt;')
+.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+//格式化时间
+function formatDate(str,time){
+    time = time && time.toUTCString() != "Invalid Date" ? time : new Date();
+    var obj = {
+        YYYY :  time.getFullYear(),
+        YY   :  (""+ time.getFullYear()).slice(-2),
+        M    :  time.getMonth()+1,
+        MM   :  ("0"+ (time.getMonth()+1)).slice(-2),
+        D    :  time.getDate(),
+        DD   :  ("0" + time.getDate()).slice(-2),
+        H    :  time.getHours(),
+        HH   :  ("0" + time.getHours()).slice(-2),
+        m    :  time.getMinutes(),
+        mm   :  ("0" + time.getMinutes()).slice(-2),
+        s    :  time.getSeconds(),
+        ss   :  ("0" + time.getSeconds()).slice(-2),
+        w    :  ['日', '一', '二', '三', '四', '五', '六'][time.getDay()]
+    };
+    return str.replace(/([a-z]+)/ig,function(a){return obj[a]||""});
+}
+console.log(formatDate("YYYY-MM-DD HH:mm:ss 星期w"));
+
+//获取url参数
+function getUrlParam(key,url){
+    url = url ? url.split("#")[0] : location.search;
+    var arr = [];
+    url.replace(new RegExp("[&?]"+ key + "=([^&#]*)","ig"), function(a,b) {
+        arr.push(decodeURIComponent(b));
+    });
+    return arr.length > 1 ? arr : arr.join("");
+}
+console.log(getUrlParam("a","http://www.baidu.com/?a=我们&a=2#a=3&a=4"));
 ```
 ### 性能
 1.添加边界符
