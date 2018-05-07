@@ -5,7 +5,7 @@
 ### 1、什么是正则表达式
 
 来源于Perl的正则表达式是一门简单语言的语法规范，主要应用于字符串的信息实现查找、替换和提取的`技巧`操作。<br/>
-这里强调是技巧操作，其处理字符串的速度是相当慢的，远不能比indexOf、lastIndexOf的速度，所以勿滥用！<br/>
+这里强调是技巧操作，其处理字符串的速度是相当慢的，远不如indexOf、lastIndexOf、includes的速度快，所以勿滥用！<br/>
 [正则表达式30分钟入门教程](http://deerchao.net/tutorials/regex/regex.htm)<br/>
 先看几个题目：<br/>
 
@@ -121,6 +121,7 @@ RegExp.escape('(*.*)');
 | multiline  |如果使用了m，值为true|
 | sticky 　　|如果使用了y，值为true, ES6|
 | unicode　　|如果使用了u，值为true, ES6|
+| dotAll　　|如果使用了s，值为true, ES7|
 | flags  　　|返回正则表达式的修饰符, ES6|
 | lastIndex  |下一次匹配开始的索引。初始值为0|
 | source 　　|正则表达式源码文本|
@@ -273,3 +274,57 @@ var reg5 = /^(?=.*\d)(?=.*[a-z])(?=.*[!@＃$％^&*()_ \- +=?])[a-z\d!@＃$％^&*
 2、使用具体的元字符（\d、\w、\s等），少用”.”字符<br/>
 3、多使用确定的量词（{n}、{n,m}），少用贪婪匹配<br/>
 4、减少分支，减少“回溯”<br/>
+
+---
+
+### ECMAScript 2018正则相关扩展
+
+#### 正则表达式的“dotall”标志
+
+以前介绍dot（“.”）是`匹配除换行符（\n \r \f）之外的任何单个字符`，虽然其实它本来就是`匹配任何单个字符`。为了确保这不会破坏任何内容，我们需要在创建正则时使用`\s`标志以使其正常工作。
+
+```
+/scs.cms/.test('scs\ncms'); //false
+const reg = /scs.cms/s;
+reg.test('scs\ncms'); //true
+reg.dotAll // true
+```
+
+#### RegExp命名组捕获(RegExp Named Group Captures)
+
+这种增强功能为其他语言（如Python，Java等）提供了有用的RegExp功能，称为“命名组”。该功能允许开发人员编写RegExp以不同部分的格式`（?<…>）`提供名称的RegExp中的组。
+
+```
+let reg = /(?<year>\d{4})-(?<month>\d{1,2})-(?<day>\d{1,2})/u;
+let result = reg.exec('2015-01-02');
+console.log(result);
+//["2015-01-02", "2015", "01", "02", index: 0, input: "2015-01-02", groups: { year: '2015', month: '01', day: '02'}]
+console.log(result.groups.year) //2015
+```
+
+我们可以使用 `\k<group name>` 格式在正则表达式本身中反向引用该组。
+
+```
+/(?<fruit>scs)==\k<fruit>/u.test('scs==scs');//true
+```
+
+在String.prototype.replace中使用命名组。
+
+```
+let reg = /(?<firstName>[A-Za-z]+) (?<lastName>[A-Za-z]+$)/u;
+'scs cms'.replace(reg, '$<lastName>, $<firstName>'); // "cms, scs"
+```
+
+#### RegExp Unicode属性转义
+
+要编写RegExp来匹配各种Unicode字符并不容易。像`\w`，`\W`，`\d`等只能匹配英文字符和数字。但是对于印度语，希腊语等其他语言的数字呢？
+
+这就是`Unicode Property Escapes`的用武之地。结果是，Unicode为每个符号（字符）添加了元数据属性，并使用它来对各种符号进行分组或描述各种符号。
+
+此外，Unicode数据库将各种类型的Emojis(表情符号)存储在属性值为“true”的布尔属性Emoji，Emoji_Component，Emoji_Presentation，Emoji_Modifier和Emoji_Modifier_Base下。所以我们可以通过简单地选择表情符号来查找所有表情符号
+
+```
+/^\p{Script=Devanagari}+$/u.test('हिन्दी'); //匹配梵文字符
+/\p{Script_Extensions=Greek}/u.test('π'); //匹配希腊字符
+/\p{Emoji}/u.test('❤️'); //匹配表情字符
+```
