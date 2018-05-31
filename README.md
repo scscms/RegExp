@@ -138,7 +138,7 @@ console.log(reg.lastIndex,reg.exec(str));//4,null
 console.log(reg.lastIndex,reg.exec(str));//0,["a1"]
 
 var reg = /a\d/giyu;
-console.log(reg.flags);//giuy
+console.log(reg.flags);//giuy  ES6规范中规定了表达式的标识按照字符顺序输出，即gimsuy
 ```
 ### 3、范围集合类（分枝条件）
 
@@ -150,7 +150,7 @@ console.log(reg.flags);//giuy
 ### 4、贪婪和非贪婪(懒惰)匹配
 当正则表达式中包含能接受重复的限定符时，通常的行为是匹配尽可能多的字符。
 ```JavaScript
-"aababxb".match(/a.*b/);
+"aababxb".match(/a.*b/);//贪婪匹配 返回aababxb
 "aababxb".match(/a.*?b/);//懒惰匹配 返回aab
 ```
 它将会匹配整个字符串。这被称为贪婪匹配。
@@ -186,7 +186,7 @@ console.log(reg.flags);//giuy
 | 代码/语法| 说明        |
 | ---------|-------------|
 | $$	   |直接量符号，即$字符|
-| $n  |第n个子表达式相匹配的文本,n等于[1-99]|
+| $n  |第n个子表达式相匹配的文本,n等于[1-99]。也可用RegExp.$n变量表示|
 | $&  |与 regexp 相匹配的子串|
 | $`  |位于匹配子串左侧的文本|
 | $'  |位于匹配子串右侧的文本|
