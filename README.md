@@ -5,11 +5,11 @@
 ### 1、什么是正则表达式
 
 来源于Perl的正则表达式是一门简单语言的语法规范，主要应用于字符串的信息实现查找、替换和提取的`技巧`操作。<br/>
-这里强调是技巧操作，其处理字符串的速度是相当慢的，远不如indexOf、lastIndexOf、includes的速度快，所以勿滥用！<br/>
+这里强调是技巧操作，其处理字符串的速度是相当慢的，远不如indexOf、lastIndexOf、includes的速度快，所以勿滥用！但又必须学会，有些需求没正则你还解决不了呢。<br/>
 [正则表达式30分钟入门教程](http://deerchao.net/tutorials/regex/regex.htm)<br/>
 先看几个题目：<br/>
 
-- 1.要求用户名必须包含数字、大写字母、小写字母、长度8位以上，且不能以数字开头？<br/>
+- 1.要求注册用户名必须包含数字、大写字母、小写字母、长度8位以上，且不能以数字开头？<br/>
 - 2.禁止密码出现三个连续相同的字符？<br/>
 - 3.怎么剔除字符串中的html标签？
 
@@ -108,6 +108,7 @@ RegExp.escape('(*.*)');
 | ------------- |:-------------:| -----|
 | regexp.exec(string) | 数组 or null | 与g、lastIndex有关 |
 | regexp.test(string) | true or false| 与g、lastIndex有关，不应该使用g |
+| regExp.compile(pattern [,flags]) |无返回|更改正则表达式模式并编译为内部格式|  
 | string.match(regexp)| 数组 or null | 与g相关,没g时与exec类似 |
 | string.replace(search,replace)| string | 与g相关$$,$&,$number,$`,$'|
 | string.search(regexp)| index or -1 | 与indexOf类似，忽略g |
@@ -176,7 +177,7 @@ console.log(reg.flags);//giuy  ES6规范中规定了表达式的标识按照字�
 | (?:exp)  |匹配exp,不捕获匹配的文本，也不给此分组分配组号|
 | (?<name>exp) |匹配exp,并捕获文本到名称为name的组里，也可以写成(?'name'exp),js不支持|
 |(?#comment)|这种类型的分组不对正则表达式的处理产生任何影响，用于提供注释让人阅读,js不支持|
-#### 2、反向引用
+#### 2、反向引用（回溯引用）
 使用小括号指定一个子表达式后，默认情况下，每个分组会自动拥有一个组号，规则是：从左向右，以分组的左括号为标志，第一个出现的分组的组号为1，第二个为2，以此类推。你可以使用(?:exp)这样的语法来剥夺一个分组对组号分配的参与权。
 ```JavaScript
 /<(\w)>.*?<\1>/
@@ -186,11 +187,26 @@ console.log(reg.flags);//giuy  ES6规范中规定了表达式的标识按照字�
 | 代码/语法| 说明        |
 | ---------|-------------|
 | $$	   |直接量符号，即$字符|
-| $n  |第n个子表达式相匹配的文本,n等于[1-99]。也可用RegExp.$n变量表示|
-| $&  |与 regexp 相匹配的子串|
-| $`  |位于匹配子串左侧的文本|
-| $'  |位于匹配子串右侧的文本|
+| $n  |第n个子表达式相匹配的文本,n等于[1-9]。等于RegExp.$n,n等于[1-9]|
+| $_  |正则搜索的字符串。等于RegExp.input|
+| $&  |正则最后一次匹配的字符串。等于RegExp.lastMatch|
+| $+  |正则最后一个分组内容。等于RegExp.lastParen|
+| $`  |正则匹配子串左侧的文本。等于RegExp.leftContext|
+| $'  |正则匹配子串右侧的文本。等于RegExp.rightContext|
 
+```
+/(\d)(\d)/.test('left89right');
+console.log(RegExp);
+/*
+RegExp.$1 = '8';
+RegExp.$2 = '9';
+RegExp.$_ = RegExp.input = 'left89right';
+RegExp['$&'] = RegExp.lastMatch = '89';
+RegExp['$+'] = RegExp.lastParen = '9';
+RegExp['$`'] = RegExp.leftContext = 'left';
+RegExp['$\''] = RegExp.rightContext = 'right';
+*/
+```
 ### 3、零宽断言
 | 代码/语法| 说明        |名称        |
 | ---------|-------------|-------------|
@@ -327,3 +343,34 @@ let reg = /(?<firstName>[A-Za-z]+) (?<lastName>[A-Za-z]+$)/u;
 /\p{Script_Extensions=Greek}/u.test('π'); //匹配希腊字符
 /\p{Emoji}/u.test('❤️'); //匹配表情字符
 ```
+
+## 课外扩展
+
+> 以下是js不支持的相关语法，可以使用Ｎotepad++测试
+
+### 大小写转换
+|元字符 |说明|
+|-----|---|
+|\l |把下个字符转换为小写|
+|\u |把下个字符转换为大写|
+|\L |把\L 和\E 之间的字符全部转换为小写|
+|\U |把\U 和\E 之间的字符全部转换为大写|
+|\E |结束\L 或者\U|
+
+例如：我们要所有英文单词首字大写
+
+查找目标：`([a-z]+)`
+
+替换为：`\u$1`
+
+### 前后查找条件
+
+格式为**(?(`condition`)match)**：条件为定义的首尾是否匹配，如果匹配，则继续执行后面的匹配。注意，首尾不包含在匹配的内容中。
+
+例如：我们要匹配有效数字格式
+
+查找目标：`^\d+(?(?=\.)\.\d{1,2})$`
+
+例如：我们要匹配\w字符串，可以有括号包围（必须是一对括号）
+
+查找目标：`^(\()?\w+(?(1)\))$`　（注意：这里使用了分组引用，但不是使用\1写法）
