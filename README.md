@@ -37,7 +37,7 @@ var regex = new Function("return /xzy/i")();//不建议
 .匹配除换行符以外的任意字符。
 
 | 正则        　| 意思          | 说明  |
-| ------------ |:-------------:| -----|
+| ------------ |:-------------| -----|
 |\d |匹配一个数字字符|等价于 \[0-9]|
 |\D |匹配一个非数字字符|等价于 \[^0-9]|
 |\f |匹配一个换页符|等价于 \x0c 和 \cL|
@@ -79,7 +79,7 @@ $ : 直接在一个正则表达式的最后一个字符出现，则表达必须�
 B、改变优先级,加上括号可以提高优先级别；<br/>
 C、作为子模式使用；<br/>
 D、可以取消子模式(?:)；<br/>
-E、反向引用 \1 \2；<br/>
+E、分组以便反向引用 如\1、\2；<br/>
 
 优先级：
 >\ 最高<br/>
@@ -105,7 +105,7 @@ RegExp.escape('(*.*)');
 ### 1、正则相关方法
 
 | 方法        　| 返回          | 注意  |
-| ------------- |:-------------:| -----|
+| ------------- |:-------------| -----|
 | regexp.exec(string) | 数组 or null | 与g、lastIndex有关 |
 | regexp.test(string) | true or false| 与g、lastIndex有关，不应该使用g |
 | regExp.compile(pattern [,flags]) |无返回|更改正则表达式模式并编译为内部格式|  
@@ -238,33 +238,32 @@ var reg = /(?=^[A-Za-z0-9]{8,}$)(?=[^\d]+\d)(?=.*[a-z])(?=.*[A-Z])\w*/;
 ### 应用
 ```JavaScript
 //去除字符串两端的空格
-String.prototype.trim = String.prototype.trim || function (){ return this.replace(/^\s*|\s*$/g,"")};
+String.prototype.trim = String.prototype.trim || function (){ return this.replace(/^\s+|\s+$/g,"")};
 
 //格式化HTML
 String(text).replace(/&/g,'&amp;').replace(/\</g,'&lt;').replace(/\>/g,'&gt;')
 .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 //格式化时间
-function formatDate(str,time){
-    time = time && time.toUTCString() != "Invalid Date" ? time : new Date();
-    var obj = {
-        YYYY :  time.getFullYear(),
-        YY   :  (""+ time.getFullYear()).slice(-2),
-        M    :  time.getMonth()+1,
-        MM   :  ("0"+ (time.getMonth()+1)).slice(-2),
-        D    :  time.getDate(),
-        DD   :  ("0" + time.getDate()).slice(-2),
-        H    :  time.getHours(),
-        HH   :  ("0" + time.getHours()).slice(-2),
-        m    :  time.getMinutes(),
-        mm   :  ("0" + time.getMinutes()).slice(-2),
-        s    :  time.getSeconds(),
-        ss   :  ("0" + time.getSeconds()).slice(-2),
-        w    :  ['日', '一', '二', '三', '四', '五', '六'][time.getDay()]
-    };
-    return str.replace(/([a-z]+)/ig,function(a){return obj[a]||""});
+function formatDate(str, date) {
+    let time = Object.prototype.toString.call(date) === '[object Date]'
+    && date.toUTCString() !== 'Invalid Date' ? date : new Date()
+    const obj = {
+        yyyy: time.getFullYear(),
+        M: time.getMonth() + 1,
+        d: time.getDate(),
+        H: time.getHours(),
+        h: time.getHours() % 12,
+        m: time.getMinutes(),
+        s: time.getSeconds(),
+        w: ['日', '一', '二', '三', '四', '五', '六'][time.getDay()]
+    }
+    return str.replace(/([a-z]+)/ig, function (a) {
+        let t = obj[a === 'yy' || a === 'yyyy' ? 'yyyy' : a.slice(-1)] || a
+        return t !== a && a.length === 2 ? ('0' + t).slice(-2) : t
+    })
 }
-console.log(formatDate("YYYY-MM-DD HH:mm:ss 星期w"));
+console.log(formatDate("yyyy-MM-dd HH:mm:ss 星期w"));
 
 //获取url参数
 function getUrlParam(key,url){
@@ -365,7 +364,7 @@ let reg = /(?<firstName>[A-Za-z]+) (?<lastName>[A-Za-z]+$)/u;
 
 ### 前后查找条件
 
-格式为**(?(`condition`)match)**：条件为定义的首尾是否匹配，如果匹配，则继续执行后面的匹配。注意，首尾不包含在匹配的内容中。
+格式为<b>(?(`condition`)match)</b>：条件为定义的首尾是否匹配，如果匹配，则继续执行后面的匹配。注意，首尾不包含在匹配的内容中。
 
 例如：我们要匹配有效数字格式
 
