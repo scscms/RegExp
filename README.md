@@ -253,13 +253,13 @@ function formatDate(str, date) {
         M: time.getMonth() + 1,
         d: time.getDate(),
         H: time.getHours(),
-        h: time.getHours() % 12,
         m: time.getMinutes(),
         s: time.getSeconds(),
         w: ['日', '一', '二', '三', '四', '五', '六'][time.getDay()]
     }
     return str.replace(/([a-z]+)/ig, function (a) {
-        let t = obj[a === 'yy' || a === 'yyyy' ? 'yyyy' : a.slice(-1)] || a
+        let t = obj[/y/i.test(a) ? 'yyyy' : a.slice(-1)]
+        t = t === undefined ? a : t
         return t !== a && a.length === 2 ? ('0' + t).slice(-2) : t
     })
 }
